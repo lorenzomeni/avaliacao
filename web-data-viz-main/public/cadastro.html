@@ -79,6 +79,7 @@
     var autorVar = nomeAutor_input.value;
     var generoVar = generoLivro_input.value;
     var precoCompra = preco_compra_input.value;
+    var qtd = qtd_estoque.value;
 
     // Verificando se há algum campo em branco
     if (
@@ -145,7 +146,8 @@
         autorServer: autorVar,
         generoServer: generoVar,
         precoCServer: precoCompra,
-        precoVServer: precovenda
+        precoVServer: precovenda,
+        qtdServer: qtd
       }),
     })
       .then(function (resposta) {
