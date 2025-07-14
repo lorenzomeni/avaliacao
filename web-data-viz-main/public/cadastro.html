@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Cadastro de livros</title>
+
+  <script src="./js/sessao.js"></script>
+</head>
+
+<body>
+
+  <span>Nome do livro:</span>
+  <input id="nomeLivro_input" type="text" placeholder="Insira aqui o nome do livro" />
+  <br> <br>
+  <span>Nome do autor:</span>
+  <input id="nomeAutor_input" type="text" placeholder="Nome do autor" />
+  <br> <br>
+  <span>Selecione o Gênero do livro</span>
+  <select id="generoLivro_input">Gênero do livro
+    <option value="Horror">Horror</option>
+    <option value="Romance">Romance</option>
+    <option value="Poesia">Poesia</option>
+    <option value="Fantasia">Fnatasia</option>
+  </select>
+  <br><br>
+  <span>Preço de compra</span>
+  <input type="number" id="preco_compra">
+  <br>
+  <span>Preço de venda</span>
+  <input type="number" id="preco_venda">
+  <br>
+  <span> Qtd no estoque</span>
+  <input type="number" id="qtd_estoque">
+  <br> <br>
+  <button onclick="cadastrar()">Cadastrar</button><br>
+  <div id="mensagem_erro"></div>
+
+  <div id="div_erros_login"></div>
+</body>
+</html>
+
+<script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  // Array para armazenar empresas cadastradas para validação de código de ativação 
+  // let listaEmpresasCadastradas = [];
+  var autores = [];
+
+  function cadastrar() {
+    // aguardar();
+
+    //Recupere o valor da nova input pelo nome do id
+    // Agora vá para o método fetch logo abaixo
+    var nomeVar = nomeLivro_input.value;
+    var autorVar = nomeAutor_input.value;
+    var generoVar = generoLivro_input.value;
+    var precoCompra = preco_compra_input.value;
+
+    // Verificando se há algum campo em branco
+    if (
+      nomeVar == "" ||
+      autorVar == "" ||
+      generoVar == "" ||
+      precoCompra == '' 
+    ) {
+      cardErro.style.display = "block";
+      mensagem_erro.innerHTML =
+        "(Mensagem de erro para todos os campos em branco)";
+
+      finalizarAguardar();
+      return false;
+    } else {
+      setInterval(sumirMensagem, 5000);
+    }
+
+    for (var i = 0; i < autorVar.length; i++) {
+      if (autorVar.includes(0) || autorVar.includes(1) ||
+      autorVar.includes(2) || autorVar.includes(3) || autorVar.includes(4) ||
+      autorVar.includes(5) || autorVar.includes(6)|| autorVar.includes(7) || autorVar.includes(8) ||
+      autorVar.includes(9) || autorVar.includes(10) || autorVar.includes('!') || autorVar.includes('@') || autorVar.includes('#') ||
+      autorVar.includes('$') || autorVar.includes('%') || autorVar.includes('¨')) {
+        alert('Apenas letras podem ser inseridas')
+      } else {
+        autores.push(autorVar)
+      }
+      
+    }
+
+    if (precoCompra >= 100 && generoVar == 'Horror' || generoVar == 'Romance') {
+      var precovenda = precoCompra * 1.225
+    } else if (precoCompra <= 50 && generoVar == 'Poesia' || generoVar == 'Horror') {
+      var precovenda = precoCompra * 1.25
+    } else if (precoCompra > 50 && precoCompra < 100 && generoVar == 'Fantasia') {
+      var precovenda = precoCompra * 1.275
+    }
+
+
+    // // Verificando se o código de ativação é de alguma empresa cadastrada
+    // for (let i = 0; i < listaEmpresasCadastradas.length; i++) {
+    //   if (listaEmpresasCadastradas[i].codigo_ativacao == codigoVar) {
+    //     idEmpresaVincular = listaEmpresasCadastradas[i].id
+    //     console.log("Código de ativação válido.");
+    //     break;
+    //   } else {
+    //     cardErro.style.display = "block";
+    //     mensagem_erro.innerHTML = "(Mensagem de erro para código inválido)";
+    //     finalizarAguardar();
+    //   }
+    // }
+
+    // Enviando o valor da nova input
+    fetch("/usuarios/cadastrar", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        // crie um atributo que recebe o valor recuperado aqui
+        // Agora vá para o arquivo routes/usuario.js
+        nomeServer: nomeVar,
+        autorServer: autorVar,
+        generoServer: generoVar,
+        precoCServer: precoCompra,
+        precoVServer: precovenda
+      }),
+    })
+      .then(function (resposta) {
+        console.log("resposta: ", resposta);
+
+        if (resposta.ok) {
+          cardErro.style.display = "block";
+
+          mensagem_erro.innerHTML =
+            "Cadastro realizado com sucesso! Redirecionando para tela de Login...";
+
+          setTimeout(() => {
+            window.location = "cadastro.html";
+          }, "2000");
+
+          limparFormulario();
+          finalizarAguardar();
+        } else {
+          throw "Houve um erro ao tentar realizar o cadastro!";
+        }
+      })
+      .catch(function (resposta) {
+        console.log(`#ERRO: ${resposta}`);
+        finalizarAguardar();
+      });
+
+    return false;
+  }
+
+  // // Listando empresas cadastradas 
+  // function listar() {
+  //   fetch("/empresas/listar", {
+  //     method: "GET",
+  //   })
+  //     .then(function (resposta) {
+  //       resposta.json().then((empresas) => {
+  //         empresas.forEach((empresa) => {
+  //           listaEmpresasCadastradas.push(empresa);
+
+  //           console.log("listaEmpresasCadastradas")
+  //           console.log(listaEmpresasCadastradas[0].codigo_ativacao)
+  //         });
+  //       });
+  //     })
+  //     .catch(function (resposta) {
+  //       console.log(`#ERRO: ${resposta}`);
+  //     });
+  // }
+
+  function sumirMensagem() {
+    cardErro.style.display = "none";
+  }
+</script>
