@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>AquaTech | Cadastro</title>
+
+  <script src="./js/sessao.js"></script>
+
+  <link rel="stylesheet" href="./css/estilo.css" />
+  <link rel="icon" href="./assets/icon/favicon2.ico" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" />
+</head>
+
+<body>
+  <!--header inicio-->
+  <div class="header">
+    <div class="container">
+      <h1 class="titulo">AquaTech</h1>
+      <ul class="navbar">
+        <li>
+          <a href="index.html">Inicial</a>
+        </li>
+        <li>
+          <a href="simulador.html">Simulador</a>
+        </li>
+        <li>|</li>
+        <li>
+          <a href="login.html">Login</a>
+        </li>
+        <li class="agora">
+          <a href="#">Cadastro</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <!--header fim-->
+
+  <div class="login">
+    <div class="alerta_erro">
+      <div class="card_erro" id="cardErro">
+        <span id="mensagem_erro"></span>
+      </div>
+    </div>
+    <div class="container">
+      <div class="card card-cadastro">
+        <h2>Bem-vindo!</h2>
+        <div class="formulario">
+          <!--
+                         Para inserir mais um campo, copie uma das inputs abaixo.
+                         Assim que inserir vá para o script abaixo.
+                     -->
+          <div class="campo">
+            <span>Nome do livro</span>
+            <input id="nomeLivro_input" type="text" placeholder="Insira aqui o nome do livro" />
+          </div>
+          <div class="campo">
+            <span>Nome do autor</span>
+            <input id="nomeAutor_input" type="text" placeholder="Nome do autor" />
+          </div>
+          <div class="campo">
+            <span>Preço de compra</span>
+            <input id="compra_input" type="number" placeholder="Preco de compra" />
+          </div>
+          <div class="campo">
+            <span>Quantidade no Estoque</span>
+            <input id="estoque_input"  type="number" placeholder="Quantidade de livros no estoque" />
+          </div>
+          <div class="campo">
+            <select id="genero_input">Selecione o gênero do livro
+              <option value="1">Horror</option>
+              <option value="2">Romance</option>
+              <option value="3">Poesia</option>
+              <option value="4">Fantasia</option>
+            </select>
+          </div>
+          <button class="botao" onclick="cadastrar()">Cadastrar</button>
+        </div>
+        <div id="div_aguardar" class="loading-div">
+          <img src="./assets/circle-loading.gif" id="loading-gif" />
+        </div>
+
+        <div id="div_erros_login"></div>
+      </div>
+    </div>
+  </div>
+
+  <!--footer inicio-->
+  <div class="footer">
+    <div class="container">
+      <h4>Feito com amor por aluno &hearts; SPTech &copy; 2023</h4>
+      <span class="version">v1.0.0</span>
+    </div>
+  </div>
+  <!--footer fim-->
+</body>
+
+</html>
+
+<script>
+
+  // Array para armazenar empresas cadastradas para validação de código de ativação 
+  let NomesAutores = [];
+
+  function cadastrar() {
+    // aguardar();
+
+    //Recupere o valor da nova input pelo nome do id
+    // Agora vá para o método fetch logo abaixo
+    var nomeVar = nomeLivro_input.value;
+    var autorVar = nomeAutor_input.value;
+    var compraVar = Number(compra_input.value);
+    var estoqueVar = Number(estoque_input.value);
+    var generoVar = Number(genero_input.value);
+
+    // Verificando se há algum campo em branco
+    if (
+      nomeVar == "" ||
+      autorVar == "" ||
+      compraVar == "" ||
+      estoqueVar == "" ||
+      generoVar == ""
+    ) {
+      cardErro.style.display = "block";
+      mensagem_erro.innerHTML =
+        "(Mensagem de erro para todos os campos em branco)";
+
+      finalizarAguardar();
+      return false;
+    } else {
+      setInterval(sumirMensagem, 5000);
+    }
+
+    // Verificando se o nome do autor contém apenas letras
+    for (var i = 0; i < autorVar.length; i++) {
+      var letra = autorVar[i].toLowerCase();
+      var valido = false;
+      if (!(letra >= 'a') && !(letra <= 'z') && !(letra >= 'A') && !(letra <= 'Z')) {
+        alert("O nome do autor deve conter apenas letras!");
+        valido = true
+        break;
+        finalizarAguardar();
+      } else {
+        console.log("Nome do autor válido: " + autorVar);
+        NomesAutores.push(autorVar);
+        nomeAutor_input.value = "";
+      }
+    }
+
+    // Verificando se o preco de compra sofrerá acrescimo
+
+    if (compraVar >= 100 && generoVar == '1' || generoVar == '2') {
+      var vendaVar = compraVar * 1.225.toFixed(2);
+    } else if (compraVar <= 50 && generoVar == '3' || generoVar == '1') {
+      vendaVar = compraVar * 1.25.toFixed(2);
+    } else if (compraVar > 50 && compraVar < 100 && generoVar == '4') {
+      vendaVar = compraVar * 1.275.toFixed(2);
+    } else {
+      vendaVar = compraVar.toFixed(2);
+    }
+
+
+    // Enviando o valor da nova input
+    fetch("/usuarios/cadastrar", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        // crie um atributo que recebe o valor recuperado aqui
+        // Agora vá para o arquivo routes/usuario.js
+        nomeServer: nomeVar,
+        autorServer: autorVar,
+        compraServer: compraVar,
+        vendaServer: vendaVar,
+        estoqueServer: estoqueVar,
+        generoServer: generoVar,
+      }),
+    })
+      .then(function (resposta) {
+        console.log("resposta: ", resposta);
+
+        if (resposta.ok) {
+          cardErro.style.display = "block";
+
+          mensagem_erro.innerHTML =
+            "Cadastro realizado com sucesso!";
+
+          setTimeout(() => {
+            window.location = "cadastro.html";
+          }, "2000");
+
+          limparFormulario();
+          finalizarAguardar();
+        } else {
+          throw "Houve um erro ao tentar realizar o cadastro!";
+        }
+      })
+      .catch(function (resposta) {
+        console.log(`#ERRO: ${resposta}`);
+        finalizarAguardar();
+      });
+
+    return false;
+  }
+
+  // // Listando empresas cadastradas 
+  // function listar() {
+  //   fetch("/empresas/listar", {
+  //     method: "GET",
+  //   })
+  //     .then(function (resposta) {
+  //       resposta.json().then((empresas) => {
+  //         empresas.forEach((empresa) => {
+  //           listaEmpresasCadastradas.push(empresa);
+
+  //           console.log("listaEmpresasCadastradas")
+  //           console.log(listaEmpresasCadastradas[0].codigo_ativacao)
+  //         });
+  //       });
+  //     })
+  //     .catch(function (resposta) {
+  //       console.log(`#ERRO: ${resposta}`);
+  //     });
+  // }
+
+  function sumirMensagem() {
+    cardErro.style.display = "none";
+  }
+</script>
